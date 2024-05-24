@@ -6,8 +6,8 @@ faceClassif = cv2.CascadeClassifier('./modelo.xml')
 def detect_faces(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces = faceClassif.detectMultiScale(gray,
-                                         scaleFactor=1.01,
-                                         minNeighbors=5,
+                                         scaleFactor=1.125,
+                                         minNeighbors=3,
                                          minSize=(30, 30),
                                          maxSize=(200, 200))
     for (x, y, w, h) in faces:
