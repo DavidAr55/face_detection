@@ -1,0 +1,52 @@
+body {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.jumbotron {
+    background-color: #1c1c1c;
+    border: 1px solid #333;
+}
+
+.form-control, .input-group-text {
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+}
+
+.form-control:focus {
+    background-color: #333;
+    color: #ffffff;
+    border-color: #777;
+}
+
+.btn-primary {
+    background-color: #6200ea;
+    border-color: #6200ea;
+}
+
+.btn-primary:hover {
+    background-color: #3700b3;
+    border-color: #3700b3;
+}
+
+.footer {
+    background-color: #1c1c1c;
+    color: #ffffff;
+}
+
+a {
+    color: #bb86fc;
+}
+
+a:hover {
+    color: #ffffff;
+}
+
+.contributors img {
+    border-radius: 50%;
+}
+
+h4 {
+    color: #bb86fc;
+}
