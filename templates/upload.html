@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Detección de rostros Flask-App - Resultado</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="display-4">Resultado de detección</h1>
+        <div class="card mt-3">
+            <img src="{{ url_for('static', filename='images/result.jpg') }}" class="card-img-top" alt="Resultado de detección">
+            <div class="card-body">
+                <h5 class="card-title">Género detectado</h5>
+                <p class="card-text">El género de la persona en la imagen es: <span id="gender_result"></span></p>
+            </div>
+            <a class="btn btn-primary mt-3" href="{{ url_for('index') }}">Volver al inicio</a>
+        </div>
+    </div>
+    <script>
+        fetch('{{ url_for("upload") }}')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('gender_result').textContent = data.gender;
+            });
+    </script>
+</body>
+</html>

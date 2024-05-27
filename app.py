@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, Response, redirect, url_for, flash
+from flask import Flask, render_template, request, Response, redirect, url_for, flash, jsonify
 import cv2
+import numpy as np
 import os
 
 app = Flask(__name__)
@@ -50,18 +51,56 @@ def index():
         return redirect(url_for('stream'))
     return render_template('index.html')
 
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file:
+            image = file.read()
+            nparr = np.fromstring(image, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            resultImg, faceBoxes = faceDetection(faceNet, img)
+            genders = []
+            for faceBox in faceBoxes:
+                face = img[max(0, faceBox[1] - padding):min(faceBox[3] + padding, img.shape[0] - 1),
+                           max(0, faceBox[0] - padding):min(faceBox[2] + padding, img.shape[1] - 1)]
+                blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
+                genderNet.setInput(blob)
+                genderPreds = genderNet.forward()
+                gender = genderList[genderPreds[0].argmax()]
+                genders.append(gender)
+                cv2.putText(resultImg, f'{gender}', (faceBox[0], faceBox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2, cv2.LINE_AA)
+            _, buffer = cv2.imencode('.jpg', resultImg)
+            result_image = buffer.tobytes()
+            return Response(result_image, mimetype='image/jpeg')
+    return render_template('upload.html')
+
 def gen_frames():
     global camera_url
+    print(camera_url)
     cap = cv2.VideoCapture(camera_url)
+    
+    # Verifica si la cámara se ha abierto correctamente
     if not cap.isOpened():
+        # Mensaje de error en el servidor Flask si la cámara no se abre
+        print(f"Error al abrir la cámara con URL: {camera_url}")
         yield b''
         return
     
     while True:
         ret, frame = cap.read()
         if not ret:
+            # Mensaje de error en el servidor Flask si no se pueden leer frames
+            print("Error al leer el frame de la cámara")
             yield b''
             break
+        
         resultImg, faceBoxes = faceDetection(faceNet, frame)
         if faceBoxes:
             for faceBox in faceBoxes:
@@ -72,11 +111,19 @@ def gen_frames():
                 genderPreds = genderNet.forward()
                 gender = genderList[genderPreds[0].argmax()]
                 cv2.putText(resultImg, f'{gender}', (faceBox[0], faceBox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2, cv2.LINE_AA)
+        
         ret, buffer = cv2.imencode('.jpg', resultImg)
+        if not ret:
+            # Mensaje de error en el servidor Flask si no se puede codificar el frame
+            print("Error al codificar el frame")
+            yield b''
+            break
+        
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
+    
+    cap.release()
 @app.route('/stream')
 def stream():
     if camera_url is None:
