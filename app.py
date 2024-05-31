@@ -1,10 +1,22 @@
-from flask import Flask, render_template, request, Response, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, Response, redirect, url_for, flash, jsonify, session
 import cv2
 import numpy as np
 import os
+import MySQLdb
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Necesario para mostrar mensajes flash
+app.secret_key = 'hot_taco'
+
+# Configuración de la conexión a la base de datos
+def get_db_connection():
+    return MySQLdb.connect(
+        host='localhost',
+        user='root',
+        password='',
+        db='face_classify',
+        charset='utf8mb4',
+        cursorclass=MySQLdb.cursors.DictCursor
+    )
 
 # Detección de rostros y género
 def faceDetection(net, frame, conf_threshold=0.7):
@@ -33,8 +45,8 @@ genderProto = "models/gender_detection/gender_deploy.prototxt"
 genderModel = "models/gender_detection/gender_net.caffemodel"
 
 # Definición de listas y valores medios del modelo:
-MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
-genderList = ['Masculino', 'Femenino']
+MODEL_MEAN_VALUES = (100.4263377603, 60.7689143744, 114.895847746)
+genderList = ['Male', 'Female']
 
 # Cargando modelos previamente entrenados
 faceNet = cv2.dnn.readNet(faceModel, faceProto)
@@ -49,7 +61,8 @@ def index():
     if request.method == 'POST':
         camera_url = "http://" + request.form['camera_url']
         return redirect(url_for('stream'))
-    return render_template('index.html')
+    session['selected_view'] = 'dashboard'
+    return render_template('dashboard.html')
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -79,6 +92,7 @@ def upload():
             _, buffer = cv2.imencode('.jpg', resultImg)
             result_image = buffer.tobytes()
             return Response(result_image, mimetype='image/jpeg')
+    session['selected_view'] = 'upload'
     return render_template('upload.html')
 
 def gen_frames():
@@ -124,16 +138,77 @@ def gen_frames():
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
     
     cap.release()
-@app.route('/stream')
+    
+@app.route('/stream', methods=['GET', 'POST'])
 def stream():
-    if camera_url is None:
-        flash('Por favor, proporciona una URL de cámara válida.')
-        return redirect(url_for('index'))
-    return render_template('stream.html')
+    global camera_url
+    if request.method == 'POST':
+        camera_url = "http://" + request.form['camera_url']
+        if not camera_url:
+            flash('Por favor, proporciona una URL de cámara válida.')
+            return redirect(url_for('stream'))
+    session['selected_view'] = 'stream'
+    return render_template('stream.html', camera_url=camera_url)
 
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/webcam')
+def webcam():
+    session['selected_view'] = 'webcam'
+    return render_template('webcam.html')
+
+def gen_frames_webcam():
+    cap = cv2.VideoCapture(0)  # Usar la cámara del dispositivo (índice 0)
+    
+    # Verifica si la cámara se ha abierto correctamente
+    if not cap.isOpened():
+        # Mensaje de error en el servidor Flask si la cámara no se abre
+        print("Error al abrir la cámara del dispositivo")
+        yield b''
+        return
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            # Mensaje de error en el servidor Flask si no se pueden leer frames
+            print("Error al leer el frame de la cámara del dispositivo")
+            yield b''
+            break
+        
+        resultImg, faceBoxes = faceDetection(faceNet, frame)
+        if faceBoxes:
+            for faceBox in faceBoxes:
+                face = frame[max(0, faceBox[1] - padding):min(faceBox[3] + padding, frame.shape[0] - 1),
+                             max(0, faceBox[0] - padding):min(faceBox[2] + padding, frame.shape[1] - 1)]
+                blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
+                genderNet.setInput(blob)
+                genderPreds = genderNet.forward()
+                gender = genderList[genderPreds[0].argmax()]
+                cv2.putText(resultImg, f'{gender}', (faceBox[0], faceBox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2, cv2.LINE_AA)
+        
+        ret, buffer = cv2.imencode('.jpg', resultImg)
+        if not ret:
+            # Mensaje de error en el servidor Flask si no se puede codificar el frame
+            print("Error al codificar el frame")
+            yield b''
+            break
+        
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    
+    cap.release()
+
+@app.route('/video_feed_webcam')
+def video_feed_webcam():
+    return Response(gen_frames_webcam(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/dashboard')
+def dashboard():
+    session['selected_view'] = 'dashboard'
+    return render_template('dashboard.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

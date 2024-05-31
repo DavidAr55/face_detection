@@ -1,29 +1,66 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Transmisión de cámara web</title>
+    <title>Face Classify - Webcam</title>
+
+    {% include "components/head.html" %}
 </head>
+
 <body>
-    <div class="container">
-        <div class="jumbotron mt-5">
-            <h1 class="display-4">Transmisión de cámara web</h1>
-            <div class="embed-responsive embed-responsive-16by9">
-                <iframe class="embed-responsive-item" src="{{ url_for('video_feed') }}" allow="camera"></iframe>
-            </div>
-            <a class="btn btn-primary mt-3" href="{{ url_for('index') }}">Volver al inicio</a>
-        </div>
+    <div class="container-fluid position-relative d-flex p-0">
+        
+        {% include "components/loader.html" %}
+        
+        {% include "components/lateral-nav.html" %}
+
+        <!-- Content Start -->
+        <div class="content">
+            
+            {% include "components/nav.html" %}
+
+            <div class="container-fluid p-4 px-4">
+                <div class="row"> <!-- Fila -->
+                    <div class="col-md-8">
+                        <div class="row bg-secondary rounded justify-content-center mx-0 pb-5">
+                            <div class="col-md-12 text-center mt-5">
+                                <h1 class="display-4 text-center pb-3">Detector de rostros Webcam</h1>
+                                <img src="{{ url_for('video_feed_webcam') }}"><br>
+                                <a class="btn btn-primary mt-5" href="{{ url_for('index') }}">Volver al inicio</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row bg-secondary rounded justify-content-center mx-0 pb-5">
+                            <div class="col-md-12 text-center mt-5">
+                                <h2 class="text-center pb-3">Gender detected</h2>
+                                <table id="gender-table" class="table table-striped table-dark border border-primary">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Male</th>
+                                            <th scope="col">Female</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td scope="row" class="bg-secondary" id="male-count">0</td>
+                                            <td scope="row" class="bg-secondary" id="female-count">0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+
+            {% include "components/footer.html" %}
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
     </div>
 
-    <footer class="footer fixed-bottom py-3 bg-dark">
-        <div class="container text-center">
-            <span class="text-light">Repositorio del proyecto: 
-                <a href="https://github.com/DavidAr55/face_detection/tree/flask-app" target="_blank">https://github.com/DavidAr55/face_detection/tree/flask-app</a>
-            </span>
-        </div>
-    </footer>
+    {% include "components/scripts.html" %}
+       
 </body>
+
 </html>

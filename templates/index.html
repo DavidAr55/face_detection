@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/old_style.css') }}">
     <title>Detección de rostros Flask-App</title>
 </head>
 <body>
@@ -50,12 +50,10 @@
         <hr class="my-4">
 
         <!-- Botón para encender la cámara del ordenador -->
-        <form method="POST" action="/webcam">
-            <div class="form-group">
-                <label for="webcam">Encender cámara del ordenador</label>
-                <button type="submit" class="btn btn-primary btn-block">Encender cámara</button>
-            </div>
-        </form>
+        <div class="form-group">
+            <label for="webcam">Encender cámara del ordenador</label>
+            <a class="btn btn-primary btn-block" href="webcam">Encender cámara</a>
+        </div>
     </div>
 
     <!-- Contenedor de contribuidores -->
