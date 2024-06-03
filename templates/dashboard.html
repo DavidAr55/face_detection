@@ -20,58 +20,13 @@
             
             {% include "components/nav.html" %}
 
-            <!-- Sale & Revenue Start -->
-            <div class="container-fluid pt-4 px-4">
-                <div class="row g-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                            <i class="fa fa-chart-line fa-3x text-primary"></i>
-                            <div class="ms-3">
-                                <p class="mb-2">Today Sale</p>
-                                <h6 class="mb-0">$1234</h6>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                            <i class="fa fa-chart-bar fa-3x text-primary"></i>
-                            <div class="ms-3">
-                                <p class="mb-2">Total Sale</p>
-                                <h6 class="mb-0">$1234</h6>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                            <i class="fa fa-chart-area fa-3x text-primary"></i>
-                            <div class="ms-3">
-                                <p class="mb-2">Today Revenue</p>
-                                <h6 class="mb-0">$1234</h6>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                            <i class="fa fa-chart-pie fa-3x text-primary"></i>
-                            <div class="ms-3">
-                                <p class="mb-2">Total Revenue</p>
-                                <h6 class="mb-0">$1234</h6>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Sale & Revenue End -->
-
-
             <!-- Sales Chart Start -->
             <div class="container-fluid pt-4 px-4">
                 <div class="row g-4">
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-secondary text-center rounded p-4">
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <h6 class="mb-0">Worldwide Sales</h6>
-                                <a href="">Show All</a>
+                                <h6 class="mb-0">Average number of genera detected</h6>
                             </div>
                             <canvas id="worldwide-sales"></canvas>
                         </div>
@@ -79,10 +34,9 @@
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-secondary text-center rounded p-4">
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <h6 class="mb-0">Salse & Revenue</h6>
-                                <a href="">Show All</a>
+                                <h6 class="mb-0">Server usage</h6>
                             </div>
-                            <canvas id="salse-revenue"></canvas>
+                            <canvas id="server-usage-chart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -164,6 +118,78 @@
     </div>
 
     {% include "components/scripts.html" %}
+
+    <script>
+        $(document).ready(function () {
+            var ctx = $("#server-usage-chart");
+            var myChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "CPU Usage",
+                        data: [],
+                        borderColor: "rgba(255, 99, 132, 1)",
+                        backgroundColor: "rgba(255, 99, 132, 0.2)"
+                    },
+                    {
+                        label: "RAM Usage",
+                        data: [],
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        backgroundColor: "rgba(54, 162, 235, 0.2)"
+                    },
+                    {
+                        label: "Disk Usage",
+                        data: [],
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        backgroundColor: "rgba(75, 192, 192, 0.2)"
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+            function updateChart() {
+                $.ajax({
+                    url: "/get_server_usage_data",
+                    type: "GET",
+                    success: function (response) {
+                        var data = response.data;
+                        var cpuUsageData = [];
+                        var ramUsageData = [];
+                        var diskUsageData = [];
+                        var labels = [];
+
+                        data.forEach(function (entry) {
+                            cpuUsageData.push(entry.cpu_usage);
+                            ramUsageData.push(entry.ram_usage);
+                            diskUsageData.push(entry.disk_usage);
+                            labels.push(""); // Labels vacíos para que no se muestren
+                        });
+
+                        myChart.data.datasets[0].data = cpuUsageData;
+                        myChart.data.datasets[1].data = ramUsageData;
+                        myChart.data.datasets[2].data = diskUsageData;
+                        myChart.data.labels = labels;
+                        myChart.update();
+                    }
+                });
+            }
+
+            // Actualizar la gráfica cada 5 segundos
+            setInterval(updateChart, 5000);
+
+            // Actualizar la gráfica al cargar la página
+            updateChart();
+        });
+    </script>
 </body>
 
 </html>

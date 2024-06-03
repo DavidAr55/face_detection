@@ -371,3 +371,9 @@
     color: #fff;
     border: 1px solid #555;
 }
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
