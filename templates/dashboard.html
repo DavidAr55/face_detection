@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Face Classify - Dashboard</title>
+
+    {% include "components/head.html" %}
+</head>
+
+<body>
+    <div class="container-fluid position-relative d-flex p-0">
+        
+        {% include "components/loader.html" %}
+
+        
+        {% include "components/lateral-nav.html" %}
+
+        <!-- Content Start -->
+        <div class="content">
+            
+            {% include "components/nav.html" %}
+
+            <!-- Sales Chart Start -->
+            <div class="container-fluid pt-4 px-4">
+                <div class="row g-4">
+                    <div class="col-sm-12 col-xl-6">
+                        <div class="bg-secondary text-center rounded p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <h6 class="mb-0">Total genders detected per minute by ESP-32 and Webcam</h6>
+                            </div>
+                            <canvas id="genders-detected"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-xl-6">
+                        <div class="bg-secondary text-center rounded p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <h6 class="mb-0">Server usage</h6>
+                            </div>
+                            <canvas id="server-usage-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Sales Chart End -->
+
+            <!-- Recent Sales Start -->
+            <div class="container-fluid pt-4 px-4">
+                <div class="bg-secondary text-center rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h6 class="mb-0">Recent Sales</h6>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="media-genders-detected" class="table table-dark border border-primary text-start align-middle table-bordered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">File name</th>
+                                    <th scope="col">Males detected</th>
+                                    <th scope="col">Females detected</th>
+                                    <th scope="col">Total detected</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in sales_data %}
+                                <tr>
+                                    <td class="bg-secondary">{{ sale.filename }}</td>
+                                    <td class="bg-secondary">{{ sale.mens_detected }}</td>
+                                    <td class="bg-secondary">{{ sale.womens_detected }}</td>
+                                    <td class="bg-secondary">{{ sale.total_detected }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Recent Sales End -->
+
+            {% include "components/footer.html" %}
+        </div>
+        <!-- Content End -->
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    </div>
+
+    {% include "components/scripts.html" %}
+
+    <script>
+        $(document).ready(function () {
+            var ctx = $("#server-usage-chart");
+            var myChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "CPU Usage",
+                        data: [],
+                        borderColor: "rgba(255, 99, 132, 1)",
+                        backgroundColor: "rgba(255, 99, 132, 0.2)"
+                    },
+                    {
+                        label: "RAM Usage",
+                        data: [],
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        backgroundColor: "rgba(54, 162, 235, 0.2)"
+                    },
+                    {
+                        label: "Disk Usage",
+                        data: [],
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        backgroundColor: "rgba(75, 192, 192, 0.2)"
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+            function updateChart() {
+                $.ajax({
+                    url: "/get_server_usage_data",
+                    type: "GET",
+                    success: function (response) {
+                        var data = response.data;
+                        var cpuUsageData = [];
+                        var ramUsageData = [];
+                        var diskUsageData = [];
+                        var labels = [];
+
+                        data.forEach(function (entry) {
+                            cpuUsageData.push(entry.cpu_usage);
+                            ramUsageData.push(entry.ram_usage);
+                            diskUsageData.push(entry.disk_usage);
+                            labels.push(""); // Labels vacíos para que no se muestren
+                        });
+
+                        myChart.data.datasets[0].data = cpuUsageData;
+                        myChart.data.datasets[1].data = ramUsageData;
+                        myChart.data.datasets[2].data = diskUsageData;
+                        myChart.data.labels = labels;
+                        myChart.update();
+                    }
+                });
+            }
+
+            // Actualizar la gráfica cada 5 segundos
+            setInterval(updateChart, 5000);
+
+            // Actualizar la gráfica al cargar la página
+            updateChart();
+
+            async function fetchGenderData() {
+                const response = await fetch('/gender_data');
+                const data = await response.json();
+                return data;
+            }
+    
+            async function renderChart() {
+                const data = await fetchGenderData();
+                const ctx = document.getElementById('genders-detected').getContext('2d');
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: "Male",
+                                data: data.mens_detected,
+                                backgroundColor: "rgba(98, 0, 234, 0.7)",
+                                borderColor: "rgba(98, 0, 234, 1)",
+                                borderWidth: 1
+                            },
+                            {
+                                label: "Female",
+                                data: data.womens_detected,
+                                backgroundColor: "rgba(180, 130, 250, 0.7)",
+                                borderColor: "rgba(180, 130, 250, 1)",
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+    
+            // Render the chart when the page loads
+            renderChart();
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+body {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.jumbotron {
+    background-color: #1c1c1c;
+    border: 1px solid #333;
+}
+
+.form-control, .input-group-text {
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+}
+
+.form-control:focus {
+    background-color: #333;
+    color: #ffffff;
+    border-color: #777;
+}
+
+.btn-primary {
+    background-color: #6200ea;
+    border-color: #6200ea;
+}
+
+.btn-primary:hover {
+    background-color: #3700b3;
+    border-color: #3700b3;
+}
+
+.btn-outline-secondary {
+    color: #ffffff;
+    border-color: #555;
+}
+
+.btn-outline-secondary:hover {
+    color: #ffffff;
+    background-color: #444;
+    border-color: #777;
+}
+
+.custom-file-input {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.custom-file-input:focus {
+    background-color: #000;
+    color: #fff;
+    border-color: #777;
+}
+
+.custom-file-label, .custom-file-label::after {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.footer {
+    background-color: #1c1c1c;
+    color: #ffffff;
+    width: 100%;
+}
+
+a {
+    color: #bb86fc;
+    transition: all .3s;
+}
+
+a:hover {
+    color: #ffffff;
+    transition: all .3s;
+}
+
+.contributors img {
+    border-radius: 50%;
+}
+
+h4 {
+    color: #bb86fc;
+}

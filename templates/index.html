@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/old_style.css') }}">
+    <title>Detección de rostros Flask-App</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Jumbotron con el título y el formulario -->
+        <div class="jumbotron mt-5">
+        <h1 class="display-4">Detección de rostros flask-app</h1>
+
+        <!-- Formulario para URL de la cámara -->
+        <form method="POST" action="/" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="basic-url">URL de la cámara</label>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">http://</span>
+                    </div>
+                    <input type="text" class="form-control" id="basic-url" name="camera_url" aria-describedby="basic-addon3">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Encender Streaming</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <hr class="my-4">
+
+        <!-- Formulario para subir una imagen -->
+        <form method="POST" action="/upload" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image">Subir una imagen</label>
+                <div class="input-group">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupFile04" name="file" required>
+                        <label class="custom-file-label" for="inputGroupFile04">Elegir archivo</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Subir y detectar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <hr class="my-4">
+
+        <!-- Botón para encender la cámara del ordenador -->
+        <div class="form-group">
+            <label for="webcam">Encender cámara del ordenador</label>
+            <a class="btn btn-primary btn-block" href="webcam">Encender cámara</a>
+        </div>
+    </div>
+
+    <!-- Contenedor de contribuidores -->
+    <div class="contributors">
+        <h2 class="text-center">En colaboración de:</h2>
+        <div class="row mx-auto mt-5">
+            <!-- Imágenes de los contribuidores -->
+            <div class="col-sm-2 mt-5">
+                <b class="d-inline-flex p-2">David Arturo Loera Olmos</b>
+            </div>
+            <div class="col-sm-2">
+                <img src="{{ url_for('static', filename='images/contributors/bread.jpg') }}" alt="Contribuidor 1" class="img-fluid">
+            </div>
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2">
+                <img src="{{ url_for('static', filename='images/contributors/hot_taco.jpg') }}" alt="Contribuidor 2" class="img-fluid">
+            </div>
+            <div class="col-sm-2 mt-5">
+                <b class="d-inline-flex p-2">Carlos Arturo Lopez Gutierrez</b>
+            </div>
+        </div>
+    </div>
+
+    <div style="height: 150px;"></div>
+
+    <!-- Footer con enlace al repositorio -->
+    <footer class="footer fixed-bottom py-3 bg-dark">
+        <div class="container text-center">
+            <span class="text-light">Repositorio del proyecto: 
+                <a href="https://github.com/DavidAr55/face_detection/tree/flask-app" target="_blank">https://github.com/DavidAr55/face_detection/tree/flask-app</a>
+            </span>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Para mostrar el nombre del archivo seleccionado
+        $(".custom-file-input").on("change", function() {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+</body>
+</html>

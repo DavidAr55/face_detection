@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Face Classify - ESP-32</title>
+
+    {% include "components/head.html" %}
+</head>
+
+<body>
+    <div class="container-fluid position-relative d-flex p-0">
+        
+        {% include "components/loader.html" %}
+
+        
+        {% include "components/lateral-nav.html" %}
+
+        <!-- Content Start -->
+        <div class="content">
+            
+            {% include "components/nav.html" %}
+
+            <div class="container-fluid pt-4 px-4">
+                <div class="row bg-secondary rounded justify-content-center mx-0">
+
+                    <!-- Formulario para URL de la cámara -->
+                    <div class="col-md-8">
+                        <form method="POST" action="/" enctype="multipart/form-data" class="mt-5">
+                            <h1 class="display-4 text-center pb-3">Detector de rostros ESP-32</h1>
+                            <div class="form-group">
+                                <label for="basic-url">URL de la cámara</label>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon3">http://</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="basic-url" name="camera_url" aria-describedby="basic-addon3">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">Encender Streaming</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="col-md-8 text-center mb-5">
+                        {% if not camera_url %}
+                            <img src="{{ url_for('static', filename='images/there-is-no-connected-camera.jpg') }}">
+                            <div class="alert alert-danger mt-5" role="alert">
+                                Por favor, proporciona una URL de cámara válida.
+                            </div>
+                        {% endif %}
+
+                        {% if camera_url %}
+                            <img src="{{ url_for('video_feed') }}" width="100%">
+                        {% endif %}
+                        <a class="btn btn-primary mt-5" href="{{ url_for('index') }}">Volver al inicio</a>
+                    </div>
+                </div>
+            </div>
+
+            {% include "components/footer.html" %}
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    </div>
+
+    {% include "components/scripts.html" %}
+</body>
+
+</html>
