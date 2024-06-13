@@ -38,8 +38,8 @@ pip install -r requirements.txt
 ```
 
 4. **Configurar la Base de Datos**
-* **Crear una base de datos MySQL llamada "face_detection"**
-* **Configurar las credenciales de la base de datos en el archivo de configuración.**
+* Crear una base de datos MySQL llamada "face_detection"
+* Configurar las credenciales de la base de datos en el archivo de configuración.
 
 
 5. **Descargar los Modelos Preentrenados**
