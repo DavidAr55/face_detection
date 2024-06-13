@@ -26,9 +26,9 @@
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-secondary text-center rounded p-4">
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <h6 class="mb-0">Average number of genera detected</h6>
+                                <h6 class="mb-0">Total genders detected per minute by ESP-32 and Webcam</h6>
                             </div>
-                            <canvas id="worldwide-sales"></canvas>
+                            <canvas id="genders-detected"></canvas>
                         </div>
                     </div>
                     <div class="col-sm-12 col-xl-6">
@@ -50,58 +50,24 @@
                         <h6 class="mb-0">Recent Sales</h6>
                     </div>
                     <div class="table-responsive">
-                        <table id="recent-sales" class="table table-dark border border-primary text-start align-middle table-bordered table-hover mb-0">
+                        <table id="media-genders-detected" class="table table-dark border border-primary text-start align-middle table-bordered table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Invoice</th>
-                                    <th scope="col">Customer</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Action</th>
+                                    <th scope="col">File name</th>
+                                    <th scope="col">Males detected</th>
+                                    <th scope="col">Females detected</th>
+                                    <th scope="col">Total detected</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for sale in sales_data %}
                                 <tr>
-                                    <td class="bg-secondary">01 Jan 2045</td>
-                                    <td class="bg-secondary">INV-0123</td>
-                                    <td class="bg-secondary">Jhon Doe</td>
-                                    <td class="bg-secondary">$123</td>
-                                    <td class="bg-secondary">Paid</td>
-                                    <td class="bg-secondary"><a class="btn btn-sm btn-primary" href="">Detail</a></td>
+                                    <td class="bg-secondary">{{ sale.filename }}</td>
+                                    <td class="bg-secondary">{{ sale.mens_detected }}</td>
+                                    <td class="bg-secondary">{{ sale.womens_detected }}</td>
+                                    <td class="bg-secondary">{{ sale.total_detected }}</td>
                                 </tr>
-                                <tr>
-                                    <td class="bg-secondary">01 Jan 2045</td>
-                                    <td class="bg-secondary">INV-0123</td>
-                                    <td class="bg-secondary">Jhon Doe</td>
-                                    <td class="bg-secondary">$123</td>
-                                    <td class="bg-secondary">Paid</td>
-                                    <td class="bg-secondary"><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="bg-secondary">01 Jan 2045</td>
-                                    <td class="bg-secondary">INV-0123</td>
-                                    <td class="bg-secondary">Jhon Doe</td>
-                                    <td class="bg-secondary">$123</td>
-                                    <td class="bg-secondary">Paid</td>
-                                    <td class="bg-secondary"><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="bg-secondary">01 Jan 2045</td>
-                                    <td class="bg-secondary">INV-0123</td>
-                                    <td class="bg-secondary">Jhon Doe</td>
-                                    <td class="bg-secondary">$123</td>
-                                    <td class="bg-secondary">Paid</td>
-                                    <td class="bg-secondary"><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="bg-secondary">01 Jan 2045</td>
-                                    <td class="bg-secondary">INV-0123</td>
-                                    <td class="bg-secondary">Jhon Doe</td>
-                                    <td class="bg-secondary">$123</td>
-                                    <td class="bg-secondary">Paid</td>
-                                    <td class="bg-secondary"><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -188,8 +154,54 @@
 
             // Actualizar la gráfica al cargar la página
             updateChart();
+
+            async function fetchGenderData() {
+                const response = await fetch('/gender_data');
+                const data = await response.json();
+                return data;
+            }
+    
+            async function renderChart() {
+                const data = await fetchGenderData();
+                const ctx = document.getElementById('genders-detected').getContext('2d');
+    
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: "Male",
+                                data: data.mens_detected,
+                                backgroundColor: "rgba(98, 0, 234, 0.7)",
+                                borderColor: "rgba(98, 0, 234, 1)",
+                                borderWidth: 1
+                            },
+                            {
+                                label: "Female",
+                                data: data.womens_detected,
+                                backgroundColor: "rgba(180, 130, 250, 0.7)",
+                                borderColor: "rgba(180, 130, 250, 1)",
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+    
+            // Render the chart when the page loads
+            renderChart();
         });
     </script>
+
 </body>
 
 </html>
